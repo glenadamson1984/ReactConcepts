@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  title: Todo Mock API
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:4010
+
+paths:
+  /todos:
+    get:
+      summary: List todos
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Todo"
+              examples:
+                sample:
+                  value:
+                    - id: 1
+                      title: "Buy milk"
+                    - id: 2
+                      title: "Walk the dog"
+    post:
+      summary: Create a todo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TodoInput"
+            example:
+              title: "Do Laundry"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+              example:
+                id: 999
+                title: "Do Laundry"
+
+components:
+  schemas:
+    Todo:
+      type: object
+      required: [id, title]
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Buy milk"
+    TodoInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          example: "Do Laundry"

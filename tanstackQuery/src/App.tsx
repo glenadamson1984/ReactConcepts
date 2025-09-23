@@ -1,35 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getTodos, createTodo, type Todo } from "./my-api";
 
 function App() {
-  const [count, setCount] = useState(0)
+  // Access the client
+  const queryClient = useQueryClient();
+
+  //Queries
+  const query = useQuery({
+    queryKey: ["todos"],
+    queryFn: getTodos,
+  });
+
+  //Mutations
+  const mutation = useMutation({
+    mutationFn: createTodo,
+    // with a real backend this is perfect but since we are using a mock server we need to manual add
+    //since prism mock server does not persist the data we need to manually add the new todo to the query data
+    // onSuccess: () => {
+    //   queryClient.invalidateQueries({ queryKey: ["todos"] });
+    // },
+    onSuccess: (created) => {
+      queryClient.setQueryData<Todo[]>(["todos"], (old) => {
+        return old ? [...old, created] : [created];
+      });
+    },
+  });
 
   return (
     <>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <ul>
+          {query.data?.map((todo: Todo) => (
+            <li key={todo.id}>{todo.title}</li>
+          ))}
+        </ul>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <button
+        onClick={() => {
+          mutation.mutate({
+            title: "Do Laundry",
+          });
+        }}
+      >
+        Add Todo
+      </button>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
