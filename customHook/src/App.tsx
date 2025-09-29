@@ -1,35 +1,29 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.tsx
+import React from "react";
+import { useWindowSize } from "./hooks/useWindowSize";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const { width, height } = useWindowSize();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+    <div
+      style={{
+        minHeight: "100vh",
+        background: width > 600 ? "#c7d2fe" : "#fbcfe8",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <h1>Custom Hook: useWindowSize</h1>
+      <p>
+        Current window size:{" "}
+        <strong>
+          {width}px × {height}px
+        </strong>
       </p>
-    </>
-  )
+      <p>(Try resizing your browser 👀)</p>
+    </div>
+  );
 }
-
-export default App

@@ -1,73 +1,101 @@
-# React + TypeScript + Vite
+# React Concepts – Custom Hook Example: useWindowSize
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project demonstrates how to build and use a **custom React hook** called `useWindowSize`.  
+The hook listens for window resize events and provides the current width and height of the browser window.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🎯 Why a Custom Hook?
 
-## React Compiler
+Custom hooks in React let you:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Extract reusable logic**: no need to repeat the same event listener code in every component.
+- **Keep components clean**: focus on rendering, while the hook handles side effects and state.
+- **Stay consistent**: follow React’s hooks pattern across your app.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ The Hook
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```tsx
+import { useState, useEffect } from "react";
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+export function useWindowSize() {
+  const [size, setSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+  useEffect(() => {
+    function handleResize() {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // update immediately
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return size; // { width, height }
+}
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📦 Example Usage
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```tsx
+import React from "react";
+import { useWindowSize } from "./hooks/useWindowSize";
+
+export default function App() {
+  const { width, height } = useWindowSize();
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: width > 600 ? "#c7d2fe" : "#fbcfe8",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <h1>Custom Hook: useWindowSize</h1>
+      <p>
+        Current window size:{" "}
+        <strong>
+          {width}px × {height}px
+        </strong>
+      </p>
+      <p>(Try resizing your browser 👀)</p>
+    </div>
+  );
+}
 ```
+
+---
+
+## ⚡ Key Learning Points
+
+1. **State initialization**: starts with `window.innerWidth` and `window.innerHeight`.
+2. **Effect setup**: `useEffect` attaches an event listener for `"resize"`.
+3. **Cleanup**: removes the event listener when the component unmounts.
+4. **Re-rendering**: React updates the component whenever the hook’s state changes.
+5. **Visual feedback**: background color changes when crossing 600px width.
+
+---
+
+## ✅ Benefits of `useWindowSize`
+
+- Simple API → just call `const { width, height } = useWindowSize()`.
+- Reusable in multiple components without duplication.
+- Encourages proper side-effect handling and cleanup in React.
+- Great teaching example for **custom hooks**.
+
+---
