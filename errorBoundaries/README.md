@@ -1,73 +1,76 @@
-# React + TypeScript + Vite
+# React Concepts – Error Boundaries Example
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project demonstrates how to handle runtime errors gracefully in React using the [`react-error-boundary`](https://github.com/bvaughn/react-error-boundary) library.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚨 What Are Error Boundaries?
 
-## React Compiler
+- In React, **error boundaries** catch JavaScript errors in their child component tree.
+- Instead of crashing the entire app, they show a **fallback UI**.
+- This is essential when dealing with unreliable components (e.g. charts, 3rd-party widgets, lazy-loaded modules).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## ⚡ Why `react-error-boundary`?
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+React still requires **class components** to implement error boundaries.  
+That means the traditional approach looks like this:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```tsx
+class ErrorBoundary extends React.Component {
+  static getDerivedStateFromError(error) { ... }
+  componentDidCatch(error, info) { ... }
+  render() { ... }
+}
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+While it works, it introduces class components into an otherwise **modern, hooks-only project**.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### ✅ Benefits of `react-error-boundary`
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **Functional component friendly**: lets us stay consistent with hooks and function components.
+- **Simpler API**: just provide a `FallbackComponent` (or `fallbackRender`).
+- **Error recovery**: supports reset logic (`onReset`, `resetKeys`) so users can try again without a full page reload.
+- **Less boilerplate**: no need to hand-write lifecycle methods (`getDerivedStateFromError`, `componentDidCatch`).
+- **Battle-tested**: maintained by Brian Vaughn (React core team), widely used across the ecosystem.
+
+---
+
+## 🛠️ Example Usage
+
+```tsx
+import { ErrorBoundary } from "react-error-boundary";
+
+function Fallback({ error }: { error: Error }) {
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre>{error.message}</pre>
+    </div>
+  );
+}
+
+function BrokenComponent() {
+  throw new Error("💥 I crashed!");
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary FallbackComponent={Fallback}>
+      <BrokenComponent />
+    </ErrorBoundary>
+  );
+}
 ```
+
+---
+
+## 📌 Key Takeaways
+
+- Error boundaries **protect the rest of your app** from crashing when one component fails.
+- We used `react-error-boundary` to:
+  - Keep codebase functional & hooks-only.
+  - Reduce boilerplate.
+  - Gain built-in recovery patterns.
+- We avoided the traditional class-based approach because it feels outdated, adds extra code, and breaks consistency in a modern React + TypeScript project.
