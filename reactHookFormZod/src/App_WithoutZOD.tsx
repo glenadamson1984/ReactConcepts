@@ -1,13 +1,9 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
-const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
-
-type FormFields = z.infer<typeof formSchema>;
+type FormFields = {
+  email: string;
+  password: string;
+};
 
 const App = () => {
   const {
@@ -20,7 +16,6 @@ const App = () => {
       email: "test@test.com",
       password: "",
     },
-    resolver: zodResolver(formSchema),
   });
 
   // the second argument for the register function is the rules for the field
@@ -30,7 +25,7 @@ const App = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       // can comment out the error to see the form work - this is just to show what would happen if there was an error on the server
-      // throw new Error();
+      throw new Error();
     } catch (error) {
       // setError("password", {
       //   message: "password failed",
@@ -48,13 +43,31 @@ const App = () => {
       onSubmit={handleSubmit(onSubmit)}
     >
       <input
-        {...register("email")}
+        {...register("email", {
+          required: "Email is required",
+          validate: (value: string) => {
+            if (!value.includes("@")) {
+              return "Email must include @";
+            }
+            return true;
+          },
+        })}
         className="border border-gray-300 rounded-md p-2"
         type="text"
         placeholder="Email"
       />
       {errors.email && <p className="text-red-500">{errors.email.message}</p>}
-      <input {...register("password")} type="password" placeholder="Password" />
+      <input
+        {...register("password", {
+          required: "Password is required",
+          minLength: {
+            value: 6,
+            message: "Password must be at least 6 characters",
+          },
+        })}
+        type="password"
+        placeholder="Password"
+      />
       {errors.password && (
         <p className="text-red-500">{errors.password.message}</p>
       )}
