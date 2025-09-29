@@ -1,35 +1,35 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Header } from "./components/Header";
+import { useTheme } from "./context/ThemeContext";
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const { theme, toggle } = useTheme();
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+      <div
+        style={{
+          height: "100vh",
+          width: "100vw",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          background: theme === "light" ? "#fff" : "#0f172a",
+          color: theme === "light" ? "#0f172a" : "#fff",
+          transition: "background 150ms ease, color 150ms ease",
+        }}
+      >
+        <Header />
+        <h1>Theme: {theme}</h1>
+        <button
+          onClick={toggle}
+          className="mt-4 px-4 py-2 rounded border"
+          aria-label="Toggle theme"
+        >
+          Toggle
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
