@@ -1,35 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useMemo, useCallback } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+// 🔹 Child component wrapped in React.memo
+// React.memo = Only re-render if props change (shallow comparison)
+const Child = React.memo(
+  ({ onClick, label }: { onClick: () => void; label: string }) => {
+    console.log(`🔄 Rendering Child: ${label}`);
+    return <button onClick={onClick}>{label}</button>;
+  }
+);
+
+export default function App() {
+  const [count, setCount] = useState(0);
+  const [other, setOther] = useState(0);
+
+  // 🔹 useMemo caches the result of an expensive calculation
+  // It only re-runs when `count` changes
+  const expensiveCalculation = useMemo(() => {
+    console.log("⚡ Running expensive calculation...");
+    let total = 0;
+    for (let i = 0; i < 100000000; i++) {
+      total += i;
+    }
+    return total + count;
+  }, [count]);
+
+  // 🔹 useCallback memoizes a function so its identity doesn’t change on re-renders
+  // Useful because Child is memoized with React.memo → it won’t re-render unless `onClick` reference changes
+  const handleClick = useCallback(() => {
+    setCount((c) => c + 1);
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div style={{ padding: "20px" }}>
+      <h1>React.memo + useMemo + useCallback</h1>
 
-export default App
+      {/* shows expensive value */}
+      <p>Expensive result: {expensiveCalculation}</p>
+
+      {/* Child only re-renders if `handleClick` changes (but it’s stable due to useCallback) */}
+      <Child onClick={handleClick} label="Increment Count" />
+
+      <p>Count: {count}</p>
+
+      {/* Updating other state won’t re-run expensive calc (because we memoized it) */}
+      <button onClick={() => setOther((o) => o + 1)}>
+        Increment Other ({other})
+      </button>
+    </div>
+  );
+}
