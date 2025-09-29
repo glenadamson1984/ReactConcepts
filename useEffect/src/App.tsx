@@ -1,21 +1,16 @@
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function App() {
-  //useEffect hook is a hook that allows you to perform
-  // side effects in your component
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
-    console.log("👋 App mounted!");
-
-    // optional cleanup function
-    return () => {
-      console.log("👋 App unmounted!");
-    };
-  }, []); // empty dependency array = run only once (on mount)
+    console.log(`Count changed: ${count}`);
+  }, [count]); // 👈 run whenever `count` changes
 
   return (
-    <div className="p-6">
-      <h1>Hello useEffect</h1>
+    <div>
+      <p>{count}</p>
+      <button onClick={() => setCount((c) => c + 1)}>Increment</button>
     </div>
   );
 }
